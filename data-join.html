@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <head>学习data joinin </head>
+  <head>
+    <title>学习Data Join</title>
+  </head>
   <body>
     <svg id="main" width="800" height="800"></svg>
 
@@ -24,20 +26,23 @@
       const g = svg.append('g').attr('id', 'maingroup')
       .attr('transform',`translate(${margin.left}, ${margin.top})`)
 
-      const xScale=d3.scaleLinear().domain([0, d3.max(data, x=>x.value)])
+      const xScale=d3.scaleBand().domain(data.map(x => x.name))
       .range([0, innerWidth])
-
-      const yScale = d3.scaleBand().domain(data.map(x => x.name)).range([0, innerHeight])
       .padding(0.5)
+
+      const yScale = d3.scaleLinear()
+      .domain([0, d3.max(data, x => x.value)])
+      .range([innerHeight, 0])
 
       g.selectAll('.dataRect').data(data).enter()
       .append('rect')
       .attr('class', 'dataRect')
-      .transition().duration(3000)
-      .attr('width', d => xScale(d.value))
-      .attr('height', yScale.bandwidth())
-      .attr('y', d => yScale(d.name))
-      .attr('fill', 'green').attr('opacity', 0.8)
+      .transition().duration(1000)
+      .attr('width', xScale.bandwidth())
+      .attr('height', x => yScale(0) - yScale(x.value))
+      .attr('x', d => xScale(d.name))
+      .attr("y", d => yScale(d.value))
+      .attr('fill', '#5470c6').attr('opacity', 0.8)
 
 
       const yAxis = d3.axisLeft(yScale)
@@ -47,10 +52,8 @@
       g.append('g').call(xAxis).attr('transform', `translate(0, ${innerHeight})`)
 
       d3.selectAll('.tick text').attr('font-size', '2em')
-      g.append('text').text('Styuy  Fuck d3').attr('font-size', '3em')
+      g.append('text').text('Study Fuck d3').attr('font-size', '3em')
       .attr('x', innerWidth/2 -200).attr('y', -10)
-
-
 
 
 
