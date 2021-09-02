@@ -2,70 +2,134 @@
 <html>
 
 <head>
-  <title>基础折线图</title>
+  <title>基础柱状图</title>
+  <link rel="stylesheet" href="../../css/index.css">
 </head>
 
 <body>
-  <svg id="main" width="800" height="800"></svg>
 
+  <svg id="main" width="800" height="600"></svg>
 
-  <script src="https://cdn.jsdelivr.net/npm/d3@7.0.1/dist/d3.min.js"></script>
+  </div>
+
+  <script src="../../js/d3.min.js"></script>
+  <script src="../../js/mchart.js"></script>
   <script>
+
+    function getSvgInfo() {
+      const svg = d3.select("#main")
+      const width = svg.attr('width')
+      const height = svg.attr('height')
+      const margin = { top: 30, right: 30, bottom: 30, left: 60 }
+      const innerHeight = height - margin.top - margin.bottom
+      const innerWidth = width - margin.left - margin.right
+      const config = {
+        colors: [
+          "#5470c6",
+          "#91cc75",
+          "#fac858",
+          "#ee6666",
+          "#73c0de",
+          "#3ba272",
+          "#fc8452",
+          "#9a60b4",
+          "#ea7ccc"
+        ],
+        opacity: 0.8,
+        tickTxt: {
+          fontSize: '2em',
+          color: '#6E7079'
+        },
+        chartTitle: {
+          text: '基础折线图',
+          fontSize: '18px',
+          color: '#464646'
+        }
+      }
+
+      return {
+        svg,
+        width,
+        height,
+        margin,
+        innerHeight,
+        innerWidth,
+        config
+      }
+    }
+
     const data = [
-      { date: 2009-01-01, value: 1 },
-      { date: 2009-01-02, value: 2 },
-      { date: 2009-01-03, value: 3 },
-      { date: 2009-01-04, value: 4 },
-      { date: 2009-01-05, value: 5 },
+      { name: 'Mon', value: 150 },
+      { name: 'Tue', value: 230 },
+      { name: 'Wed', value: 224 },
+      { name: 'Thu', value: 218 },
+      { name: 'Fri', value: 135 },
+      { name: 'Sat', value: 147 },
+      { name: 'Sun', value: 260 },
     ]
-    const svg = d3.select("#main")
-    const width = svg.attr('width')
-    const height = svg.attr('height')
-    const margin = { top: 60, right: 30, bottom: 60, left: 200 }
-    const innerHeight = height - margin.top - margin.bottom
-    const innerWidth = width - margin.left - margin.right
 
-    const g = svg.append('g').attr('id', 'maingroup')
-      .attr('transform', `translate(${margin.left}, ${margin.top})`)
+    const {
+      svg,
+      width,
+      height,
+      margin,
+      innerHeight,
+      innerWidth,
+      config
+    } = getSvgInfo()
 
-    const xScale = d3.scaleUtc().domain([data[0].date,data[data.length-1].date])
-    .range([0, innerWidth])
+    const chart = svg.append('g')
+      .attr('id', 'maingroup')
+      .attr('transform', `translate(${margin.left},${margin.top})`)
+
+    const xScale = d3.scaleBand()
+      .domain(data.map(x => x.name))
+      .range([0, innerWidth])
+
+    const xAxis = d3.axisBottom(xScale)
+
+    chart.append('g').call(xAxis)
+      .attr('transform', `translate(0, ${innerHeight})`)
 
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(data, x => x.value)])
       .range([innerHeight, 0])
 
-
-      g.append('path')
-      .data(data)
-      .join('g')
-      .attr("stroke-width", 1.5)
-      .attr("fill", "none")
-      .attr('d', d3.line()
-        .x(d => xScale(d.date))
-        .y(d => yScale(d.value))
-      )
-
-    // g.selectAll('.dataRect').data(data).enter()
-    //   .append('rect')
-    //   .attr('class', 'dataRect')
-    //   // .transition().duration(1000)
-    //   .attr('width', xScale.bandwidth())
-    //   .attr('height', x => yScale(0) - yScale(x.value))
-    //   .attr('x', d => xScale(d.name))
-    //   .attr("y", d => yScale(d.value))
-    //   .attr('fill', '#5470c6').attr('opacity', 0.8)
-
-
     const yAxis = d3.axisLeft(yScale)
-    const xAxis = d3.axisBottom(xScale).ticks(innerWidth / 80).tickSizeOuter(0)
 
-    g.append('g').call(yAxis)
-    g.append('g').call(xAxis).attr('transform', `translate(0, ${innerHeight})`)
+    chart.append('g').call(yAxis)
 
-    d3.selectAll('.tick text').attr('font-size', '2em')
-    g.append('text').text('Study Fuck d3').attr('font-size', '3em')
-      .attr('x', innerWidth / 2 - 200).attr('y', -10)
+    const line = d3.line()
+        .defined(d => !isNaN(d.value))
+        .x(d => xScale(d.name))
+        .y(d => yScale(d.value))
+
+    chart.append("path")
+      .datum(data)
+      .attr("fill", "none")
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 1.5)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr('d', line)
+
+    setTickStyle()
+    setChartTitle(chart)
+
+    function setTickStyle() {
+      d3.selectAll('.tick text')
+      .attr('font-size', config.tickTxt.fontSize)
+      .attr('color', config.tickTxt.color)
+    }
+
+    function setChartTitle (chart) {
+      chart.append('text').text(config.chartTitle.text)
+      .attr('font-size', config.chartTitle.fontSize)
+      .attr('color', config.chartTitle.color)
+      .attr('transform', `translate(${innerWidth/2}, ${-10})`)
+      .attr('text-anchor', 'middle')
+      .attr('font-weight', 'bold')
+    }
 
 
 

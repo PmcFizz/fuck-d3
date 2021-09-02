@@ -3,59 +3,131 @@
 
 <head>
   <title>基础柱状图</title>
+  <link rel="stylesheet" href="../../css/index.css">
 </head>
 
 <body>
-  <svg id="main" width="800" height="800"></svg>
 
+  <svg id="main" width="800" height="600"></svg>
 
-  <script src="https://cdn.jsdelivr.net/npm/d3@7.0.1/dist/d3.min.js"></script>
+  </div>
+
+  <script src="../../js/d3.min.js"></script>
+  <script src="../../js/mchart.js"></script>
   <script>
+
+    function getSvgInfo() {
+      const svg = d3.select("#main")
+      const width = svg.attr('width')
+      const height = svg.attr('height')
+      const margin = { top: 30, right: 30, bottom: 30, left: 60 }
+      const innerHeight = height - margin.top - margin.bottom
+      const innerWidth = width - margin.left - margin.right
+      const config = {
+        colors: [
+          "#5470c6",
+          "#91cc75",
+          "#fac858",
+          "#ee6666",
+          "#73c0de",
+          "#3ba272",
+          "#fc8452",
+          "#9a60b4",
+          "#ea7ccc"
+        ],
+        opacity: 0.8,
+        tickTxt: {
+          fontSize: '2em',
+          color: '#6E7079'
+        },
+        chartTitle: {
+          text: '图表标题',
+          fontSize: '18px',
+          color: '#464646'
+        }
+      }
+
+      return {
+        svg,
+        width,
+        height,
+        margin,
+        innerHeight,
+        innerWidth,
+        config
+      }
+    }
+
     const data = [
-      { name: 'a', value: 1 },
-      { name: 'b', value: 2 },
-      { name: 'c', value: 3 },
-      { name: 'd', value: 4 },
-      { name: 'e', value: 5 },
+      { name: 'Mon', value: 120 },
+      { name: 'Tue', value: 200 },
+      { name: 'Wed', value: 150 },
+      { name: 'Thu', value: 80 },
+      { name: 'Fri', value: 70 },
+      { name: 'Sat', value: 110 },
+      { name: 'Sun', value: 130 },
     ]
-    const svg = d3.select("#main")
-    const width = svg.attr('width')
-    const height = svg.attr('height')
-    const margin = { top: 60, right: 30, bottom: 60, left: 200 }
-    const innerHeight = height - margin.top - margin.bottom
-    const innerWidth = width - margin.left - margin.right
 
-    const g = svg.append('g').attr('id', 'maingroup')
-      .attr('transform', `translate(${margin.left}, ${margin.top})`)
+    const {
+      svg,
+      width,
+      height,
+      margin,
+      innerHeight,
+      innerWidth,
+      config
+    } = getSvgInfo()
 
-    const xScale = d3.scaleBand().domain(data.map(x => x.name))
+    const chart = svg.append('g')
+      .attr('id', 'maingroup')
+      .attr('transform', `translate(${margin.left},${margin.top})`)
+
+    const xScale = d3.scaleBand()
+      .domain(data.map(x => x.name))
       .range([0, innerWidth])
       .padding(0.5)
+
+    const xAxis = d3.axisBottom(xScale)
+
+    chart.append('g').call(xAxis)
+      .attr('transform', `translate(0, ${innerHeight})`)
 
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(data, x => x.value)])
       .range([innerHeight, 0])
 
-    g.selectAll('.dataRect').data(data).enter()
+    const yAxis = d3.axisLeft(yScale)
+
+    chart.append('g').call(yAxis)
+
+    chart.selectAll('.data-rect')
+      .data(data).enter()
       .append('rect')
-      .attr('class', 'dataRect')
-      // .transition().duration(1000)
+      .attr('class', 'data-rect')
       .attr('width', xScale.bandwidth())
       .attr('height', x => yScale(0) - yScale(x.value))
       .attr('x', d => xScale(d.name))
-      .attr("y", d => yScale(d.value))
-      .attr('fill', '#5470c6').attr('opacity', 0.8)
+      .attr('y', d => yScale(d.value))
+      .attr('fill', config.colors[0])
+      .attr('opacity', config.opacity)
 
+    setTickStyle()
+    setChartTitle(chart)
 
-    const yAxis = d3.axisLeft(yScale)
-    const xAxis = d3.axisBottom(xScale)
+    function setTickStyle() {
+      d3.selectAll('.tick text')
+      .attr('font-size', config.tickTxt.fontSize)
+      .attr('color', config.tickTxt.color)
+    }
 
-    g.append('g').call(yAxis)
-    g.append('g').call(xAxis).attr('transform', `translate(0, ${innerHeight})`)
-
-    d3.selectAll('.tick text').attr('font-size', '2em')
-    g.append('text').text('Study Fuck d3').attr('font-size', '3em')
-      .attr('x', innerWidth / 2 - 200).attr('y', -10)
+    function setChartTitle (chart) {
+      chart.append('text').text(config.chartTitle.text)
+      .attr('font-size', config.chartTitle.fontSize)
+      .attr('color', config.chartTitle.color)
+      .attr('transform', `translate(${innerWidth/2}, ${-10})`)
+      .attr('text-anchor', 'middle')
+      .attr('font-weight', 'bold')
+    }
 
 
 
