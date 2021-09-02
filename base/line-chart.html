@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>学习Data Join</title>
+  <title>基础折线图</title>
 </head>
 
 <body>
@@ -12,11 +12,11 @@
   <script src="https://cdn.jsdelivr.net/npm/d3@7.0.1/dist/d3.min.js"></script>
   <script>
     const data = [
-      { name: 'a', value: 1 },
-      { name: 'b', value: 2 },
-      { name: 'c', value: 3 },
-      { name: 'd', value: 4 },
-      { name: 'e', value: 5 },
+      { date: 2009-01-01, value: 1 },
+      { date: 2009-01-02, value: 2 },
+      { date: 2009-01-03, value: 3 },
+      { date: 2009-01-04, value: 4 },
+      { date: 2009-01-05, value: 5 },
     ]
     const svg = d3.select("#main")
     const width = svg.attr('width')
@@ -28,27 +28,37 @@
     const g = svg.append('g').attr('id', 'maingroup')
       .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
-    const xScale = d3.scaleBand().domain(data.map(x => x.name))
-      .range([0, innerWidth])
-      .padding(0.5)
+    const xScale = d3.scaleUtc().domain([data[0].date,data[data.length-1].date])
+    .range([0, innerWidth])
 
     const yScale = d3.scaleLinear()
       .domain([0, d3.max(data, x => x.value)])
       .range([innerHeight, 0])
 
-    g.selectAll('.dataRect').data(data).enter()
-      .append('rect')
-      .attr('class', 'dataRect')
-      // .transition().duration(1000)
-      .attr('width', xScale.bandwidth())
-      .attr('height', x => yScale(0) - yScale(x.value))
-      .attr('x', d => xScale(d.name))
-      .attr("y", d => yScale(d.value))
-      .attr('fill', '#5470c6').attr('opacity', 0.8)
+
+      g.append('path')
+      .data(data)
+      .join('g')
+      .attr("stroke-width", 1.5)
+      .attr("fill", "none")
+      .attr('d', d3.line()
+        .x(d => xScale(d.date))
+        .y(d => yScale(d.value))
+      )
+
+    // g.selectAll('.dataRect').data(data).enter()
+    //   .append('rect')
+    //   .attr('class', 'dataRect')
+    //   // .transition().duration(1000)
+    //   .attr('width', xScale.bandwidth())
+    //   .attr('height', x => yScale(0) - yScale(x.value))
+    //   .attr('x', d => xScale(d.name))
+    //   .attr("y", d => yScale(d.value))
+    //   .attr('fill', '#5470c6').attr('opacity', 0.8)
 
 
     const yAxis = d3.axisLeft(yScale)
-    const xAxis = d3.axisBottom(xScale)
+    const xAxis = d3.axisBottom(xScale).ticks(innerWidth / 80).tickSizeOuter(0)
 
     g.append('g').call(yAxis)
     g.append('g').call(xAxis).attr('transform', `translate(0, ${innerHeight})`)
