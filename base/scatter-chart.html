@@ -48,7 +48,6 @@
     const innerWidth = width - margin.left - margin.right
 
     const g = svg.append('g').attr('id', 'maingroup')
-      .attr("stroke-linecap", "round")
       .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
     const xScale = d3.scaleLinear().domain([0, d3.max(data, x => x.xValue)])
@@ -63,6 +62,7 @@
       .attr('class', 'scatter')
       .attr('d', d => `M${xScale(d.xValue)}, ${yScale(d.yValue)}h0`)
       .attr("stroke", "steelblue")
+      .attr("stroke-linecap", "round")
       .attr("stroke-width", 20)
       .attr('fill', '#5470c6')
 
