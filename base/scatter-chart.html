@@ -11,13 +11,35 @@
 
   <script src="https://cdn.jsdelivr.net/npm/d3@7.0.1/dist/d3.min.js"></script>
   <script>
-    const data = [
-      { name: 'a', value: 1 },
-      { name: 'b', value: 2 },
-      { name: 'c', value: 3 },
-      { name: 'd', value: 4 },
-      { name: 'e', value: 5 },
+    const originData = [
+      [10.0, 8.04],
+      [8.07, 6.95],
+      [13.0, 7.58],
+      [9.05, 8.81],
+      [11.0, 8.33],
+      [14.0, 7.66],
+      [13.4, 6.81],
+      [10.0, 6.33],
+      [14.0, 8.96],
+      [12.5, 6.82],
+      [9.15, 7.20],
+      [11.5, 7.20],
+      [3.03, 4.23],
+      [12.2, 7.83],
+      [2.02, 4.47],
+      [1.05, 3.33],
+      [4.05, 4.96],
+      [6.03, 7.24],
+      [12.0, 6.26],
+      [12.0, 8.84],
+      [7.08, 5.82],
+      [5.02, 5.68]
     ]
+
+    const data = originData.map(x => {
+      return { xValue: x[0], yValue: x[1] }
+    })
+
     const svg = d3.select("#main")
     const width = svg.attr('width')
     const height = svg.attr('height')
@@ -26,25 +48,23 @@
     const innerWidth = width - margin.left - margin.right
 
     const g = svg.append('g').attr('id', 'maingroup')
+      .attr("stroke-linecap", "round")
       .attr('transform', `translate(${margin.left}, ${margin.top})`)
 
-    const xScale = d3.scaleBand().domain(data.map(x => x.name))
-      .range([0, innerWidth])
-      .padding(0.5)
+    const xScale = d3.scaleLinear().domain([0, d3.max(data, x => x.xValue)])
+      .range([0, innerWidth]).nice()
 
     const yScale = d3.scaleLinear()
-      .domain([0, d3.max(data, x => x.value)])
-      .range([innerHeight, 0])
+      .domain([0, d3.max(data, x => x.yValue)])
+      .range([innerHeight, 0]).nice()
 
-    g.selectAll('.dataRect').data(data).enter()
-      .append('rect')
-      .attr('class', 'dataRect')
-      // .transition().duration(1000)
-      .attr('width', xScale.bandwidth())
-      .attr('height', x => yScale(0) - yScale(x.value))
-      .attr('x', d => xScale(d.name))
-      .attr("y", d => yScale(d.value))
-      .attr('fill', '#5470c6').attr('opacity', 0.8)
+    g.selectAll('.scatter').data(data)
+      .join('path')
+      .attr('class', 'scatter')
+      .attr('d', d => `M${xScale(d.xValue)}, ${yScale(d.yValue)}h0`)
+      .attr("stroke", "steelblue")
+      .attr("stroke-width", 20)
+      .attr('fill', '#5470c6')
 
 
     const yAxis = d3.axisLeft(yScale)
@@ -54,7 +74,7 @@
     g.append('g').call(xAxis).attr('transform', `translate(0, ${innerHeight})`)
 
     d3.selectAll('.tick text').attr('font-size', '2em')
-    g.append('text').text('Study Fuck d3').attr('font-size', '3em')
+    g.append('text').text('基础散点图').attr('font-size', '3em')
       .attr('x', innerWidth / 2 - 200).attr('y', -10)
 
 
